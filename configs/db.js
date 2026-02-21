@@ -1,50 +1,77 @@
 'use strict';
 
-import mongoose from "mongoose";
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+// Configuración de PostgreSQL (igual que la API .NET)
+export const sequelize = new Sequelize({
+  dialect: 'postgres',
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  logging: process.env.DB_SQL_LOGGING === 'true' ? console.log : false,
+  define: {
+    freezeTableName: true, // Usar nombres exactos sin pluralización
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    underscored: true, // Usar snake_case para todos los campos
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+});
+
+// Función para conectar a la base de datos
 export const dbConnection = async () => {
-    try {
-        mongoose.connection.on('error', () => {
-            console.log('MongoDB | no se pudo conectar a mongoDB');
-            mongoose.disconnect();
-        });
-        mongoose.connection.on('connecting', () => {
-            console.log('MongoDB | intentando conectar a mongoDB');
-        });
-        mongoose.connection.on('connected', () => {
-            console.log('MongoDB | conectado a mongoDB');
-        });
-        mongoose.connection.on('open', () => {
-            console.log('MongoDB | conectado a la base de datos DBAiSentinel');
-        });
-        mongoose.connection.on('reconnected', () => {
-            console.log('MongoDB | reconectando a mongoDB');
-        });
-        mongoose.connection.on('disconnected', () => {
-            console.log('MongoDB | desconectando a mongoDB');
-        });
+  try {
+    console.log('PostgreSQL | Trying to connect...');
 
-        await mongoose.connect(process.env.URI_MONGO, {
-            serverSelectionTimeoutMS: 5000,
-            maxPoolSize: 10
-        })
-    } catch (error) {
-        console.log(`Error al conectar la db: ${error}`);
+    await sequelize.authenticate();
+    console.log('PostgreSQL | Connected to PostgreSQL');
+    console.log('PostgreSQL | Connection to database established');
+
+    // Sincronizar modelos en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      const syncLogging =
+        process.env.DB_SQL_LOGGING === 'true' ? console.log : false;
+      await sequelize.sync({ alter: true, logging: syncLogging });
+      console.log('PostgreSQL | Models synchronized with database');
     }
-}
+  } catch (error) {
+    console.error('PostgreSQL | Could not connect to PostgreSQL');
+    console.error('PostgreSQL | Error:', error.message);
+    console.error('Stack trace:', error.stack);
+    process.exit(1);
+  }
+};
 
+// Graceful shutdown handlers
 const gracefulShutdown = async (signal) => {
-    console.log(`MongoDB | Received ${signal}. Closing database connection...`);
-    try {
-        await mongoose.connection.close();
-        console.log('MongoDB | Database connection closed successfully');
-        process.exit(0);
-    } catch (error) {
-        console.error('MongoDB | Error during graceful shutdown:', error.message);
-        process.exit(1);
-    }
-}
+  console.log(
+    `PostgreSQL | Received ${signal}. Closing database connection...`
+  );
+  try {
+    await sequelize.close();
+    console.log('PostgreSQL | Database connection closed successfully');
+    process.exit(0);
+  } catch (error) {
+    console.error(
+      'PostgreSQL | Error during graceful shutdown:',
+      error.message
+    );
+    process.exit(1);
+  }
+};
 
+// Handle different termination signals
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGURS2', () => gracefulShutdown('SIGURS2'));
+process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2')); // For nodemon restarts
