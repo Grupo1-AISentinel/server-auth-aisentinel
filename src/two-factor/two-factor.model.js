@@ -3,8 +3,6 @@ import { sequelize } from '../../configs/db.js';
 import { generateUserId } from '../../helpers/uuid-generator.js';
 import { User } from '../users/user.model.js';
 
-// Modelo TwoFactorAuth (equivalente a TwoFactorAuth.cs en .NET)
-// Tabla separada para no contaminar el modelo User
 export const TwoFactorAuth = sequelize.define(
   'TwoFactorAuth',
   {
@@ -55,6 +53,5 @@ export const TwoFactorAuth = sequelize.define(
   }
 );
 
-// Asociaciones (equivalente a navigation properties en .NET)
 User.hasOne(TwoFactorAuth, { foreignKey: 'user_id', as: 'TwoFactorAuth' });
 TwoFactorAuth.belongsTo(User, { foreignKey: 'user_id', as: 'User' });

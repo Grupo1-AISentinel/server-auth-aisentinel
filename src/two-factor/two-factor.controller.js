@@ -7,11 +7,7 @@ import {
 } from '../../helpers/two-factor-operations.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
 
-/**
- * POST /api/v1/two-factor/setup
- * Genera el secreto TOTP, imagen QR y recovery codes
- * Requiere JWT válido (usuario autenticado)
- */
+
 export const setup = asyncHandler(async (req, res) => {
   try {
     const result = await generateSetupAsync(
@@ -34,11 +30,7 @@ export const setup = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * POST /api/v1/two-factor/verify-and-enable
- * Verifica el código TOTP y activa el 2FA permanentemente
- * Body: { code: "123456" }
- */
+
 export const verifyAndEnable = asyncHandler(async (req, res) => {
   try {
     const { code } = req.body;
@@ -71,11 +63,7 @@ export const verifyAndEnable = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * POST /api/v1/two-factor/disable
- * Deshabilita el 2FA tras verificar el código actual
- * Body: { code: "123456" }
- */
+
 export const disable = asyncHandler(async (req, res) => {
   try {
     const { code } = req.body;
@@ -106,11 +94,7 @@ export const disable = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * GET /api/v1/two-factor/status
- * Devuelve si el 2FA está activado para el usuario actual
- * Response: { enabled: boolean, enabledAt: Date|null }
- */
+
 export const getStatus = asyncHandler(async (req, res) => {
   try {
     const result = await getStatusAsync(req.userId);
@@ -125,10 +109,7 @@ export const getStatus = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * POST /api/v1/two-factor/recovery-codes
- * Regenera los 8 códigos de recuperación invalidando los anteriores
- */
+
 export const regenerateRecoveryCodes = asyncHandler(async (req, res) => {
   try {
     const result = await regenerateRecoveryCodesAsync(req.userId);

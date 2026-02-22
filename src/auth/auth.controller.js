@@ -8,6 +8,10 @@ import {
 } from '../../helpers/auth-operations.js';
 import { getUserProfileHelper } from '../../helpers/profile-operations.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
+import { verifyCodeAsync } from '../../helpers/two-factor-operations.js';
+import { verifyJWT, generateJWT } from '../../helpers/generate-jwt.js';
+import { findUserById } from '../../helpers/user-db.js';
+import { buildUserResponse } from '../../utils/user-helpers.js';
 
 export const register = asyncHandler(async (req, res) => {
   try {
@@ -201,4 +205,88 @@ export const getProfileById = asyncHandler(async (req, res) => {
     message: 'Perfil obtenido exitosamente',
     data: user,
   });
+});
+
+
+export const verifyTwoFactor = asyncHandler(async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'El campo "code" es requerido.',
+      });
+    }
+
+    const tempToken =
+      req.headers['x-token'] ||
+      req.headers['authorization']?.replace('Bearer ', '') ||
+      req.body.token;
+
+    if (!tempToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token de sesión temporal no proporcionado.',
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = await verifyJWT(tempToken);
+    } catch {
+      return res.status(401).json({
+        success: false,
+        message: 'Token inválido o expirado. Reinicia el proceso de login.',
+      });
+    }
+
+    if (!decoded.twoFactorPending) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token no válido para verificación de 2FA.',
+      });
+    }
+
+    const userId = decoded.sub;
+
+    await verifyCodeAsync(userId, code.trim());
+
+    const user = await findUserById(userId);
+    const role = user.UserRoles?.[0]?.Role?.Name || 'Coordinador';
+    const token = await generateJWT(userId, { role });
+
+    const expiresInMs =
+      (parseInt(process.env.JWT_EXPIRES_IN) || 30) * 60 * 1000;
+    const expiresAt = new Date(Date.now() + expiresInMs);
+
+    const fullUser = buildUserResponse(user);
+    const userDetails = {
+      id: fullUser.id,
+      username: fullUser.username,
+      profilePicture: fullUser.profilePicture,
+      role: fullUser.role,
+      twoFactorEnabled: true,
+    };
+
+    return res.status(200).json({
+      success: true,
+      requiresTwoFactor: false,
+      message: 'Login exitoso',
+      token,
+      userDetails,
+      expiresAt,
+    });
+  } catch (error) {
+    console.error('Error in verify-2fa controller:', error);
+
+    let statusCode = 401;
+    if (error.message.includes('no está activado')) statusCode = 400;
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Código inválido',
+      error: error.message,
+    });
+  }
 });
