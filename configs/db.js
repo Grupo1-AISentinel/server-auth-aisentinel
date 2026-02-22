@@ -5,13 +5,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Configuración de PostgreSQL (igual que la API .NET)
 export const sequelize = new Sequelize({
   dialect: 'postgres',
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   database: process.env.DB_NAME,
-  username: process.env.DB_USERNAME,
+  username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   logging: process.env.DB_SQL_LOGGING === 'true' ? console.log : false,
   define: {
