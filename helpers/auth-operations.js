@@ -180,8 +180,37 @@ export const loginUserHelper = async (emailOrUsername, password) => {
       throw new Error('Tu cuenta está desactivada. Contacta al administrador.');
     }
 
-    // Generate JWT with role claim
     const role = user.UserRoles?.[0]?.Role?.Name || 'Coordinador';
+
+    // Si el usuario tiene 2FA habilitado → emitir JWT temporal (5 min, twoFactorPending: true)
+    // El cliente debe llamar a POST /auth/verify-2fa con el código del Authenticator
+    if (user.TwoFactorAuth?.IsEnabled === true) {
+      const tempToken = await generateJWT(
+        user.Id.toString(),
+        { role, twoFactorPending: true },
+        { expiresIn: '5m' }
+      );
+
+      const fullUser = buildUserResponse(user);
+      const userDetails = {
+        id: fullUser.id,
+        username: fullUser.username,
+        profilePicture: fullUser.profilePicture,
+        role: fullUser.role,
+        twoFactorEnabled: true,
+      };
+
+      return {
+        success: true,
+        requiresTwoFactor: true,
+        message: 'Se requiere verificación de dos factores. Ingresa el código de tu app Authenticator.',
+        token: tempToken,
+        userDetails,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutos para completar 2FA
+      };
+    }
+
+    // Generate full JWT with role claim
     const token = await generateJWT(user.Id.toString(), { role });
 
     // Calcular fecha de expiración basada en la configuración
@@ -195,11 +224,13 @@ export const loginUserHelper = async (emailOrUsername, password) => {
       username: fullUser.username,
       profilePicture: fullUser.profilePicture,
       role: fullUser.role,
+      twoFactorEnabled: false,
     };
 
     // AuthResponseDto equivalent structure
     return {
       success: true,
+      requiresTwoFactor: false,
       message: 'Login exitoso',
       token,
       userDetails,

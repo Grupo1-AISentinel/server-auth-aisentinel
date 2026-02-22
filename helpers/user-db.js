@@ -5,6 +5,7 @@ import {
   UserPasswordReset,
 } from '../src/users/user.model.js';
 import { UserRole, Role } from '../src/auth/role.model.js';
+import { TwoFactorAuth } from '../src/two-factor/two-factor.model.js';
 import { USER_ROLE } from './role-constants.js';
 import { hashPassword } from '../utils/password-utils.js';
 import { Op } from 'sequelize';
@@ -32,6 +33,7 @@ export const findUserByEmailOrUsername = async (emailOrUsername) => {
           as: 'UserRoles',
           include: [{ model: Role, as: 'Role' }],
         },
+        { model: TwoFactorAuth, as: 'TwoFactorAuth' },
       ],
     });
 
@@ -54,6 +56,7 @@ export const findUserById = async (userId) => {
           as: 'UserRoles',
           include: [{ model: Role, as: 'Role' }],
         },
+        { model: TwoFactorAuth, as: 'TwoFactorAuth' },
       ],
     });
 

@@ -85,6 +85,7 @@ export const config = {
   // App Settings (aligned with .NET AppSettings)
   app: {
     frontendUrl: process.env.FRONTEND_URL,
+    name: process.env.APP_NAME || 'KinalSports',
   },
 
   // Security Settings (aligned with .NET Security config)
