@@ -42,7 +42,7 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
     const mailOptions = {
       from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
       to: email,
-      subject: 'Verify your email address', // Aligned with .NET
+      subject: 'Verify your email address', 
       html: `
         <h2>Welcome ${name}!</h2>
         <p>Please verify your email address by clicking the link below:</p>
@@ -75,7 +75,7 @@ export const sendPasswordResetEmail = async (email, name, resetToken) => {
     const mailOptions = {
       from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
       to: email,
-      subject: 'Reset your password', // Aligned with .NET
+      subject: 'Reset your password', 
       html: `
         <h2>Password Reset Request</h2>
         <p>Hello ${name},</p>
@@ -106,7 +106,7 @@ export const sendWelcomeEmail = async (email, name) => {
     const mailOptions = {
       from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
       to: email,
-      subject: 'Welcome to AISentinel!', // Aligned with .NET
+      subject: 'Welcome to AISentinel!',
       html: `
         <h2>Welcome to AISentinel, ${name}!</h2>
         <p>Your account has been successfully verified and activated.</p>
@@ -132,7 +132,7 @@ export const sendPasswordChangedEmail = async (email, name) => {
     const mailOptions = {
       from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
       to: email,
-      subject: 'Password Changed Successfully', // More aligned with .NET style
+      subject: 'Password Changed Successfully', 
       html: `
         <h2>Password Changed</h2>
         <p>Hello ${name},</p>

@@ -2,7 +2,6 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../../configs/db.js';
 import { generateUserId } from '../../helpers/uuid-generator.js';
 
-// Modelo User principal (equivalente a User.cs en .NET) - usando snake_case
 export const User = sequelize.define(
   'User',
   {
@@ -102,7 +101,6 @@ export const User = sequelize.define(
   }
 );
 
-// Modelo UserProfile (equivalente a UserProfile.cs en .NET) - usando snake_case
 export const UserProfile = sequelize.define(
   'UserProfile',
   {
@@ -146,7 +144,6 @@ export const UserProfile = sequelize.define(
   }
 );
 
-// Modelo UserEmail (equivalente a UserEmail.cs en .NET) - usando snake_case
 export const UserEmail = sequelize.define(
   'UserEmail',
   {
@@ -188,7 +185,6 @@ export const UserEmail = sequelize.define(
   }
 );
 
-// Modelo UserPasswordReset (equivalente a UserPasswordReset.cs en .NET) - usando snake_case
 export const UserPasswordReset = sequelize.define(
   'UserPasswordReset',
   {
@@ -224,7 +220,6 @@ export const UserPasswordReset = sequelize.define(
   }
 );
 
-// Definir las relaciones (equivalente a las navigation properties en .NET)
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'UserProfile' });
 UserProfile.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
 

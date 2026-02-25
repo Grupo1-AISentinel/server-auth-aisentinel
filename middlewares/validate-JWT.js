@@ -9,7 +9,7 @@ export const validateJWT = async (req, res, next) => {
     let token =
       req.header('x-token') ||
       req.header('authorization') ||
-      req.body.token ||
+      req.body?.token ||
       req.query.token;
 
     if (!token) {

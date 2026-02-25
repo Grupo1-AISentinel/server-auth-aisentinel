@@ -1,9 +1,7 @@
 import path from 'path';
 import { randomBytes } from 'crypto';
 
-/**
- * Validador de archivos similar al de .NET
- */
+
 export class FileValidator {
   static ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
   static MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
