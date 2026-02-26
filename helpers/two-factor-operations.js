@@ -22,11 +22,15 @@ const generateRecoveryCodes = () => {
   return codes;
 };
 
-export const generateSetupAsync = async (userId, userEmail) => {
+export const generateSetupAsync = async (userId) => {
+  const existing = await TwoFactorAuth.findOne({ where: { UserId: userId } });
+
+  if (existing?.IsEnabled) {
+    throw new Error('El 2FA ya está activado en esta cuenta. Desactívalo primero desde /two-factor/disable.');
+  }
+
   await TwoFactorAuth.destroy({ where: { UserId: userId } });
   const secretKey = speakeasy.generateSecret({ length: 20 }).base32;
-  const otpUri = speakeasy.otpauthURL({ secret: secretKey, issuer: APP_NAME, label: userEmail, encoding: 'base32' });
-  const qrCodeImage = await QRCode.toDataURL(otpUri);
   const recoveryCodes = generateRecoveryCodes();
 
   await TwoFactorAuth.create({
@@ -38,8 +42,7 @@ export const generateSetupAsync = async (userId, userEmail) => {
 
   return {
     secretKey,
-    qrCodeImage,       // Data URL de la imagen PNG del QR
-    manualEntryKey: secretKey, // Para ingresar manualmente en la app
+    manualEntryKey: secretKey,
     recoveryCodes,
   };
 };
@@ -133,6 +136,31 @@ export const getStatusAsync = async (userId) => {
   };
 };
 
+
+export const getQRCodeBufferAsync = async (userId) => {
+  const tfa = await TwoFactorAuth.findOne({ where: { UserId: userId } });
+
+  if (!tfa) {
+    throw new Error('Setup de 2FA no encontrado. Primero llama a /two-factor/setup.');
+  }
+
+  if (tfa.IsEnabled) {
+    throw new Error('El 2FA ya está activado. El QR ya no está disponible.');
+  }
+
+  const { User } = await import('../src/users/user.model.js');
+  const user = await User.findByPk(userId);
+  const label = user?.Email ?? userId;
+
+  const otpUri = speakeasy.otpauthURL({
+    secret: tfa.SecretKey,
+    issuer: APP_NAME,
+    label,
+    encoding: 'base32',
+  });
+
+  return QRCode.toBuffer(otpUri);
+};
 
 export const regenerateRecoveryCodesAsync = async (userId) => {
   const tfa = await TwoFactorAuth.findOne({ where: { UserId: userId } });
