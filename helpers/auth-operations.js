@@ -165,28 +165,17 @@ export const loginUserHelper = async (emailOrUsername, password) => {
 
  
     if (user.TwoFactorAuth?.IsEnabled === true) {
-      const tempToken = await generateJWT(
+      const twoFAToken = await generateJWT(
         user.Id.toString(),
         { role, twoFactorPending: true },
         { expiresIn: '5m' }
       );
 
-      const fullUser = buildUserResponse(user);
-      const userDetails = {
-        id: fullUser.id,
-        username: fullUser.username,
-        profilePicture: fullUser.profilePicture,
-        role: fullUser.role,
-        twoFactorEnabled: true,
-      };
-
       return {
         success: true,
         requiresTwoFactor: true,
         message: 'Se requiere verificación de dos factores. Ingresa el código de tu app Authenticator.',
-        token: tempToken,
-        userDetails,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutos para completar 2FA
+        twoFAToken,
       };
     }
 

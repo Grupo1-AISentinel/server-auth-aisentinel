@@ -6,6 +6,7 @@ import * as twoFactorController from './two-factor.controller.js';
 const router = Router();
 
 router.post('/setup', validateJWT, twoFactorController.setup);
+router.get('/setup/qr', validateJWT, twoFactorController.getQRCode);
 
 router.post(
   '/verify-and-enable',

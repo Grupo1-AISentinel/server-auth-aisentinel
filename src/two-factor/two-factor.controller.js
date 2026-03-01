@@ -4,28 +4,26 @@ import {
   disableAsync,
   getStatusAsync,
   regenerateRecoveryCodesAsync,
+  getQRCodeBufferAsync,
 } from '../../helpers/two-factor-operations.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
 
 
 export const setup = asyncHandler(async (req, res) => {
   try {
-    const result = await generateSetupAsync(
-      req.userId,
-      req.user.Email
-    );
+    const result = await generateSetupAsync(req.userId);
 
     res.status(200).json({
       success: true,
-      message: 'Escanea el código QR con tu app Authenticator (Google Authenticator, Authy, etc.), luego llama a /verify-and-enable con el código generado.',
+      message: 'Setup generado. Obtén el QR en GET /two-factor/setup/qr o usa el secretKey manualmente. Luego llama a /verify-and-enable con el código generado.',
       ...result,
     });
   } catch (error) {
     console.error('Error in two-factor/setup controller:', error);
-    res.status(500).json({
+    const statusCode = error.message.includes('ya está activado') ? 409 : 500;
+    res.status(statusCode).json({
       success: false,
       message: error.message || 'Error al generar el setup de 2FA',
-      error: error.message,
     });
   }
 });
@@ -109,6 +107,24 @@ export const getStatus = asyncHandler(async (req, res) => {
   }
 });
 
+
+export const getQRCode = asyncHandler(async (req, res) => {
+  try {
+    const buffer = await getQRCodeBufferAsync(req.userId);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', 'inline; filename="qr-2fa.png"');
+    return res.status(200).send(buffer);
+  } catch (error) {
+    console.error('Error in two-factor/qr controller:', error);
+    const statusCode = error.message.includes('no encontrado') ? 404
+      : error.message.includes('ya está activado') ? 409
+      : 500;
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Error al generar el QR',
+    });
+  }
+});
 
 export const regenerateRecoveryCodes = asyncHandler(async (req, res) => {
   try {
