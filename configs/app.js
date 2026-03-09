@@ -19,6 +19,7 @@ import {
 import authRoutes from '../src/auth/auth.routes.js';
 import userRoutes from '../src/users/user.routes.js';
 import twoFactorRoutes from '../src/two-factor/two-factor.routes.js';
+import internalRoutes from '../src/internal/internal.routes.js';
 
 const BASE_PATH = '/api/v1';
 
@@ -35,6 +36,7 @@ const routes = (app) => {
   app.use(`${BASE_PATH}/auth`, authRoutes);
   app.use(`${BASE_PATH}/users`, userRoutes);
   app.use(`${BASE_PATH}/two-factor`, twoFactorRoutes);
+  app.use(`${BASE_PATH}/internal`, internalRoutes);
 
   app.get(`${BASE_PATH}/health`, (req, res) => {
     res.status(200).json({
