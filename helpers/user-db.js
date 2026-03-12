@@ -6,7 +6,7 @@ import {
 } from '../src/users/user.model.js';
 import { UserRole, Role } from '../src/auth/role.model.js';
 import { TwoFactorAuth } from '../src/two-factor/two-factor.model.js';
-import { USER_ROLE } from './role-constants.js';
+import { COORDINATOR_ROLE } from './role-constants.js';
 import { hashPassword } from '../utils/password-utils.js';
 import { Op } from 'sequelize';
 
@@ -101,7 +101,7 @@ export const createNewUser = async (userData) => {
         Username: username.toLowerCase(),
         Email: email.toLowerCase(),
         Password: hashedPassword,
-        Status: false, 
+        Status: false,
       },
       { transaction }
     );
@@ -136,7 +136,7 @@ export const createNewUser = async (userData) => {
     );
 
     const userRole = await Role.findOne(
-      { where: { Name: USER_ROLE } },
+      { where: { Name: COORDINATOR_ROLE } },
       { transaction }
     );
     if (userRole) {
@@ -149,7 +149,7 @@ export const createNewUser = async (userData) => {
       );
     } else {
       console.warn(
-        `Coordinador role not found in database during user creation for user ${user.Id}`
+        `${COORDINATOR_ROLE} role not found in database during user creation for user ${user.Id}`
       );
     }
 

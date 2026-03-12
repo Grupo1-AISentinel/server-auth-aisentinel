@@ -54,9 +54,9 @@ export const createInternalUser = asyncHandler(async (req, res) => {
     phone: phone || '00000000',
   });
 
-  // createNewUser asigna 'Coordinador' por defecto; cambiar si es Administrador
-  if (role === 'Administrador') {
-    await setUserSingleRole(newUser, 'Administrador', sequelize);
+  // createNewUser asigna COORDINATOR_ROLE por defecto; cambiar si es ADMIN_ROLE
+  if (role === 'ADMIN_ROLE') {
+    await setUserSingleRole(newUser, 'ADMIN_ROLE', sequelize);
   }
 
   const completeUser = await findUserById(newUser.Id);

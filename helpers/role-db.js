@@ -41,17 +41,17 @@ export const getUsersByRole = async (roleName) => {
 export const setUserSingleRole = async (user, roleName, sequelize) => {
   const normalized = (roleName || '').trim();
   if (!ALLOWED_ROLES.includes(normalized)) {
-    const err = new Error('Role not allowed. Use Administrador or Coordinador');
+    const err = new Error(`Role not allowed. Use ${ADMIN_ROLE} or ${COORDINATOR_ROLE}`);
     err.status = 400;
     throw err;
   }
 
   return sequelize.transaction(async (t) => {
     const isUserAdmin = (user.UserRoles || []).some(
-      (r) => r.Role?.Name === 'Administrador'
+      (r) => r.Role?.Name === ADMIN_ROLE
     );
-    if (isUserAdmin && normalized !== 'Administrador') {
-      const adminCount = await countUsersInRole('Administrador');
+    if (isUserAdmin && normalized !== ADMIN_ROLE) {
+      const adminCount = await countUsersInRole(ADMIN_ROLE);
       if (adminCount <= 1) {
         const err = new Error('Cannot remove the last administrator');
         err.status = 409;

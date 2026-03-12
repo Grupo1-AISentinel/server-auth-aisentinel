@@ -1,3 +1,3 @@
-export const ADMIN_ROLE = 'Administrador';
-export const USER_ROLE = 'Coordinador';
-export const ALLOWED_ROLES = [ADMIN_ROLE, USER_ROLE];
+export const ADMIN_ROLE = 'ADMIN_ROLE';
+export const COORDINATOR_ROLE = 'COORDINATOR_ROLE';
+export const ALLOWED_ROLES = [ADMIN_ROLE, COORDINATOR_ROLE];

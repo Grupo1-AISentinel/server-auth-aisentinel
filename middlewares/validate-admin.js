@@ -19,7 +19,7 @@ export const validateAdmin = async (req, res, next) => {
     if (!roles.includes(ADMIN_ROLE)) {
       return res.status(403).json({
         success: false,
-        message: 'Acceso denegado. Esta acción es exclusiva para el rol Administrador.',
+        message: `Acceso denegado. Esta acción es exclusiva para el rol ${ADMIN_ROLE}.`,
       });
     }
 

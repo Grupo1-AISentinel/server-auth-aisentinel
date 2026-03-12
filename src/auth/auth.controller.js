@@ -12,6 +12,7 @@ import { verifyCodeAsync } from '../../helpers/two-factor-operations.js';
 import { verifyJWT, generateJWT } from '../../helpers/generate-jwt.js';
 import { findUserById } from '../../helpers/user-db.js';
 import { buildUserResponse } from '../../utils/user-helpers.js';
+import { COORDINATOR_ROLE } from '../../helpers/role-constants.js';
 
 export const register = asyncHandler(async (req, res) => {
   try {
@@ -253,7 +254,7 @@ export const verifyTwoFactor = asyncHandler(async (req, res) => {
     await verifyCodeAsync(userId, code.trim());
 
     const user = await findUserById(userId);
-    const role = user.UserRoles?.[0]?.Role?.Name || 'Coordinador';
+    const role = user.UserRoles?.[0]?.Role?.Name || COORDINATOR_ROLE;
     const token = await generateJWT(userId, { role });
 
     const expiresInMs =
