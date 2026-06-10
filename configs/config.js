@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -23,8 +22,8 @@ export const config = {
   },
 
   upload: {
-    maxSize: 5 * 1024 * 1024, 
-    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'], 
+    maxSize: 5 * 1024 * 1024,
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
     uploadPath: process.env.UPLOAD_PATH,
   },
 
@@ -35,25 +34,21 @@ export const config = {
     baseUrl: process.env.CLOUDINARY_BASE_URL,
 
     defaultAvatarPath:
-      process.env.CLOUDINARY_DEFAULT_AVATAR &&
-      !process.env.CLOUDINARY_DEFAULT_AVATAR.includes('${')
+      process.env.CLOUDINARY_DEFAULT_AVATAR && !process.env.CLOUDINARY_DEFAULT_AVATAR.includes('${')
         ? process.env.CLOUDINARY_DEFAULT_AVATAR
-        : [
-            process.env.CLOUDINARY_FOLDER,
-            process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME,
-          ]
+        : [process.env.CLOUDINARY_FOLDER, process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME]
             .filter(Boolean)
             .join('/'),
     folder: process.env.CLOUDINARY_FOLDER,
   },
 
   rateLimit: {
-    windowMs: 1 * 60 * 1000,  
-    maxRequests: 20,
-    authWindowMs: 1 * 60 * 1000, 
-    authMaxRequests: 5,
-    emailWindowMs: 15 * 60 * 1000, 
-    emailMaxRequests: 3,
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 1 * 60 * 1000,
+    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 200,
+    authWindowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW_MS, 10) || 1 * 60 * 1000,
+    authMaxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX_REQUESTS, 10) || 5,
+    emailWindowMs: parseInt(process.env.RATE_LIMIT_EMAIL_WINDOW_MS, 10) || 15 * 60 * 1000,
+    emailMaxRequests: parseInt(process.env.RATE_LIMIT_EMAIL_MAX_REQUESTS, 10) || 3,
   },
 
   security: {

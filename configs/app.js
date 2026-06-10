@@ -14,10 +14,7 @@ import '../src/two-factor/two-factor.model.js';
 import { requestLimit } from '../middlewares/request-limit.js';
 import { corsOptions } from './cors-configuration.js';
 import { helmetConfiguration } from './helmet-configuration.js';
-import {
-  errorHandler,
-  notFound,
-} from '../middlewares/server-genericError-handler.js';
+import { errorHandler, notFound } from '../middlewares/server-genericError-handler.js';
 import authRoutes from '../src/auth/auth.routes.js';
 import userRoutes from '../src/users/user.routes.js';
 import twoFactorRoutes from '../src/two-factor/two-factor.routes.js';
@@ -59,7 +56,7 @@ export const initServer = async () => {
 
   try {
     await dbConnection();
-    
+
     const { seedRoles } = await import('../helpers/role-seed.js');
     await seedRoles();
 
