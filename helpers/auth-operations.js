@@ -151,11 +151,14 @@ export const loginUserHelper = async (emailOrUsername, password) => {
       throw new Error('Credenciales inválidas');
     }
 
-    if (!user.UserEmail || !user.UserEmail.EmailVerified) {
-      throw new Error(
-        'Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada o reenvía el email de verificación.'
-      );
-    }
+    // [FIX DEMO] Validación de email verificado desactivada para la demo.
+    // En producción, restaurar:
+    //   if (!user.UserEmail || !user.UserEmail.EmailVerified) { throw ... }
+    // if (!user.UserEmail || !user.UserEmail.EmailVerified) {
+    //   throw new Error(
+    //     'Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada o reenvía el email de verificación.'
+    //   );
+    // }
 
     if (!user.Status) {
       throw new Error('Tu cuenta está desactivada. Contacta al administrador.');

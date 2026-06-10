@@ -353,3 +353,16 @@ export const updateUserPassword = async (userId, hashedPassword) => {
     throw new Error('Error al actualizar contraseña');
   }
 };
+
+export const updateUserLastActivity = async (userId) => {
+  try {
+    const [affected] = await User.update(
+      { LastActivity: new Date() },
+      { where: { Id: userId } }
+    );
+    return affected > 0;
+  } catch (error) {
+    console.error('Error actualizando lastActivity:', error);
+    throw new Error('Error al registrar actividad del usuario');
+  }
+};

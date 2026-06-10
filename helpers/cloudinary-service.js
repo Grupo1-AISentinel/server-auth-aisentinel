@@ -71,24 +71,31 @@ export const deleteImage = async (imagePath) => {
 };
 
 export const getFullImageUrl = (imagePath) => {
-  if (!imagePath) {
-    return getDefaultAvatarUrl();
+  // [FIX] Evitar recursion infinita: si no hay imagePath, devolver URL vacia
+  // o un placeholder sin volver a llamar a getDefaultAvatarUrl.
+  if (!imagePath || imagePath === 'undefined' || imagePath === 'null') {
+    const placeholder = '/assets/default-avatar.png';
+    const baseUrl = config.cloudinary?.baseUrl;
+    return baseUrl ? `${baseUrl}${placeholder}` : placeholder;
   }
 
-  const baseUrl = config.cloudinary.baseUrl;
-  const folder = config.cloudinary.folder;
+  const baseUrl = config.cloudinary?.baseUrl || '';
+  const folder = config.cloudinary?.folder || '';
 
-  const pathToUse = !imagePath
-    ? config.cloudinary.defaultAvatarPath
-    : imagePath.includes('/')
-      ? imagePath
-      : `${folder}/${imagePath}`;
+  const pathToUse = imagePath.includes('/')
+    ? imagePath
+    : `${folder}/${imagePath}`;
 
   return `${baseUrl}${pathToUse}`;
 };
 
 export const getDefaultAvatarUrl = () => {
-  const defaultPath = config.cloudinary.defaultAvatarPath;
+  const defaultPath = config.cloudinary?.defaultAvatarPath;
+  if (!defaultPath || defaultPath === 'undefined' || defaultPath === 'null') {
+    const placeholder = '/assets/default-avatar.png';
+    const baseUrl = config.cloudinary?.baseUrl;
+    return baseUrl ? `${baseUrl}${placeholder}` : placeholder;
+  }
   return getFullImageUrl(defaultPath);
 };
 
