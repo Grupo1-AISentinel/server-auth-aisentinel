@@ -54,6 +54,18 @@ export const createInternalUser = asyncHandler(async (req, res) => {
     phone: phone || '00000000',
   });
 
+  // [FIX DEMO] Los usuarios creados via internal (seeder, admin) ya nacen
+  // verificados Y activos. En produccion, los coordinadores deberian
+  // verificar email + activar via panel de admin.
+  await UserEmail.update(
+    { EmailVerified: true },
+    { where: { UserId: newUser.Id } }
+  );
+  await User.update(
+    { Status: true },
+    { where: { Id: newUser.Id } }
+  );
+
   // createNewUser asigna COORDINATOR_ROLE por defecto; cambiar si es ADMIN_ROLE
   if (role === 'ADMIN_ROLE') {
     await setUserSingleRole(newUser, 'ADMIN_ROLE', sequelize);
@@ -65,6 +77,25 @@ export const createInternalUser = asyncHandler(async (req, res) => {
     success: true,
     message: 'Usuario creado exitosamente',
     data: buildUserResponse(completeUser),
+  });
+});
+
+// GET /api/v1/internal/users/by-email?email=...
+// Usado por el admin para reconciliar Coordinators con auth-users
+// cuando el user ya existe en auth (ej. tras re-seed) pero el Coordinator
+// Mongo no se creo (caso del seeder demo).
+export const findInternalUserByEmail = asyncHandler(async (req, res) => {
+  const { email } = req.query;
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'email requerido' });
+  }
+  const user = await User.findOne({ where: { Email: email } });
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+  }
+  return res.status(200).json({
+    success: true,
+    data: { id: user.Id, email: user.Email, username: user.Username },
   });
 });
 

@@ -1,7 +1,7 @@
 'use strict';
 
 import { Router } from 'express';
-import { createInternalUser, deleteInternalUser } from './internal.controller.js';
+import { createInternalUser, deleteInternalUser, findInternalUserByEmail } from './internal.controller.js';
 
 const router = Router();
 
@@ -19,6 +19,7 @@ const validateInternalToken = (req, res, next) => {
 router.use(validateInternalToken);
 
 router.post('/users', createInternalUser);
+router.get('/users/by-email', findInternalUserByEmail);
 router.delete('/users/:userId', deleteInternalUser);
 
 export default router;

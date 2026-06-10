@@ -64,5 +64,6 @@ router.post(
 router.get('/profile', validateJWT, authController.getProfile);
 router.post('/profile/by-id', requestLimit, authController.getProfileById);
 router.post('/verify-2fa', authRateLimit, authController.verifyTwoFactor);
+router.post('/heartbeat', validateJWT, authController.heartbeat);
 
 export default router;

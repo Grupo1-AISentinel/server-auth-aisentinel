@@ -10,7 +10,7 @@ import { getUserProfileHelper } from '../../helpers/profile-operations.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
 import { verifyCodeAsync } from '../../helpers/two-factor-operations.js';
 import { verifyJWT, generateJWT } from '../../helpers/generate-jwt.js';
-import { findUserById } from '../../helpers/user-db.js';
+import { findUserById, updateUserLastActivity } from '../../helpers/user-db.js';
 import { buildUserResponse } from '../../utils/user-helpers.js';
 import { COORDINATOR_ROLE } from '../../helpers/role-constants.js';
 
@@ -290,4 +290,15 @@ export const verifyTwoFactor = asyncHandler(async (req, res) => {
       error: error.message,
     });
   }
+});
+
+export const heartbeat = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const updated = await updateUserLastActivity(userId);
+  return res.status(200).json({
+    success: true,
+    userId,
+    lastActivity: new Date().toISOString(),
+    registered: updated,
+  });
 });

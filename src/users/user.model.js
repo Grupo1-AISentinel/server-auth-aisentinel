@@ -80,6 +80,12 @@ export const User = sequelize.define(
       allowNull: false,
       field: 'status',
     },
+    LastActivity: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null,
+      field: 'last_activity',
+    },
     CreatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
