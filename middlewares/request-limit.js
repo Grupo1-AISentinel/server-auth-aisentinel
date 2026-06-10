@@ -5,6 +5,10 @@ import { config } from '../configs/config.js';
 export const requestLimit = rateLimit({
   windowMs: config.rateLimit.windowMs,
   max: config.rateLimit.maxRequests,
+  skip: (req) => {
+    const token = req.header('x-internal-token') || req.header('x-internal-api-key');
+    return Boolean(token && token === process.env.INTERNAL_API_TOKEN);
+  },
   message: {
     success: false,
     message: 'Demasiadas peticiones desde esta IP, intenta de nuevo más tarde.',
@@ -15,8 +19,7 @@ export const requestLimit = rateLimit({
   handler: (req, res) => {
     res.status(429).json({
       success: false,
-      message:
-        'Demasiadas peticiones desde esta IP, intenta de nuevo más tarde.',
+      message: 'Demasiadas peticiones desde esta IP, intenta de nuevo más tarde.',
       retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
     });
   },
@@ -28,8 +31,7 @@ export const authRateLimit = rateLimit({
   max: config.rateLimit.authMaxRequests,
   message: {
     success: false,
-    message:
-      'Demasiados intentos de autenticación, intenta de nuevo más tarde.',
+    message: 'Demasiados intentos de autenticación, intenta de nuevo más tarde.',
     retryAfter: Math.ceil(config.rateLimit.authWindowMs / 1000),
   },
   standardHeaders: true,
@@ -38,8 +40,7 @@ export const authRateLimit = rateLimit({
     console.log(`Rate limit exceeded for IP: ${req.ip} on ${req.path}`);
     res.status(429).json({
       success: false,
-      message:
-        'Demasiados intentos de autenticación, intenta de nuevo más tarde.',
+      message: 'Demasiados intentos de autenticación, intenta de nuevo más tarde.',
       retryAfter: Math.ceil(config.rateLimit.authWindowMs / 1000),
     });
   },
