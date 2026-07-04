@@ -295,10 +295,26 @@ export const verifyTwoFactor = asyncHandler(async (req, res) => {
 export const heartbeat = asyncHandler(async (req, res) => {
   const userId = req.userId;
   const updated = await updateUserLastActivity(userId);
+
+  // Renovacion silenciosa: el JWT dura JWT_EXPIRES_IN (30 min por defecto) y
+  // no existe flujo de refresh-token separado. Sin esto, cualquier sesion de
+  // monitoreo activa mas de 30 min pierde el token a mitad de uso: el proximo
+  // request (p.ej. la subida de frame de camara) responde 401 "No hay token",
+  // dispara el backoff exponencial del cliente (hasta 10s de freeze visible)
+  // y fuerza un logout+relogin. El heartbeat ya se llama cada 60s mientras la
+  // sesion esta activa (ver IdleTimerProvider.jsx), ventana mas que suficiente
+  // para reemitir el token antes de que expire.
+  const role = req.user?.UserRoles?.[0]?.Role?.Name || COORDINATOR_ROLE;
+  const token = await generateJWT(userId, { role });
+  const expiresInMs = (parseInt(process.env.JWT_EXPIRES_IN) || 30) * 60 * 1000;
+  const expiresAt = new Date(Date.now() + expiresInMs);
+
   return res.status(200).json({
     success: true,
     userId,
     lastActivity: new Date().toISOString(),
     registered: updated,
+    token,
+    expiresAt,
   });
 });
